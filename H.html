@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selamat Ulang Tahun!</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(to top, #020111 0%, #3a3a52 100%);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      position: absolute;
+      top: 35%;
+      width: 100%;
+      font-size: 3em;
+      color: #ffeb3b;
+      text-shadow: 0 0 10px #ff4081, 0 0 20px #ff4081;
+      animation: glow 2s infinite alternate;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    #countdown {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      font-size: 4em;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      text-shadow: 0 0 20px #ff4081, 0 0 40px #ff4081;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff4081, 0 0 20px #ff4081; }
+      to { text-shadow: 0 0 30px #ffeb3b, 0 0 50px #ffeb3b; }
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title">Selamat Ulang Tahun, syirin </h1>
+  <div id="countdown"></div>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const title = document.getElementById('title');
+    const countdown = document.getElementById('countdown');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Tampilkan teks utama
+    setTimeout(() => {
+      title.style.opacity = 1;
+    }, 500);
+
+    // Setelah 2 detik mulai countdown
+    setTimeout(() => {
+      let time = 3;
+      countdown.style.opacity = 1;
+      countdown.textContent = time;
+      const timer = setInterval(() => {
+        time--;
+        countdown.textContent = time > 0 ? time : "";
+        if (time <= 0) {
+          clearInterval(timer);
+          setTimeout(() => {
+            title.style.opacity = 0;
+            countdown.style.opacity = 0;
+            setTimeout(() => {
+              canvas.style.display = 'block';
+              startAnimation();
+            }, 1000);
+          }, 1000);
+        }
+      }, 1000);
+    }, 2000);
+
+    // Fungsi animasi
+    function startAnimation() {
+      class Balloon {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = canvas.height + Math.random() * 100;
+          this.radius = 20 + Math.random() * 20;
+          this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+          this.speed = 1 + Math.random() * 2;
+        }
+        update() {
+          this.y -= this.speed;
+          if (this.y < -this.radius) {
+            this.y = canvas.height + this.radius;
+            this.x = Math.random() * canvas.width;
+          }
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.ellipse(this.x, this.y, this.radius * 0.7, this.radius, 0, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y + this.radius);
+          ctx.lineTo(this.x, this.y + this.radius + 20);
+          ctx.stroke();
+        }
+      }
+
+      const balloons = [];
+      for (let i = 0; i < 40; i++) {
+        balloons.push(new Balloon());
+      }
+
+      class Firework {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.particles = [];
+          for (let i = 0; i < 50; i++) {
+            this.particles.push({
+              x: x,
+              y: y,
+              angle: Math.random() * 2 * Math.PI,
+              speed: Math.random() * 5 + 2,
+              life: 100,
+              color: `hsl(${Math.random() * 360}, 100%, 60%)`
+            });
+          }
+        }
+        update() {
+          this.particles.forEach(p => {
+            p.x += Math.cos(p.angle) * p.speed;
+            p.y += Math.sin(p.angle) * p.speed;
+            p.speed *= 0.95;
+            p.life--;
+          });
+        }
+        draw() {
+          this.particles.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+          });
+        }
+      }
+
+      const fireworks = [];
+      function createFirework() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height / 2;
+        fireworks.push(new Firework(x, y));
+      }
+
+      function animate() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        balloons.forEach(b => { b.update(); b.draw(); });
+        fireworks.forEach(f => { f.update(); f.draw(); });
+        if (Math.random() < 0.05) createFirework();
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+  </script>
+</body>
+</html>
